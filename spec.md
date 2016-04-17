@@ -4,11 +4,15 @@
 
 - Version: 0.1
 - Date: 2016-04-17
-- License: 
+- License:
+
+## Table of Contents
+
+
 
 ## Scope
 
-datap is a format to define configurable, modular data processing pipes.
+datap is a YAML format to define configurable, modular data processing pipes.
 
 ## Definitions
 
@@ -21,7 +25,7 @@ datap is a format to define configurable, modular data processing pipes.
 
 ###  Context
 
-A datap **context** is defined in a single YAML document. A YAML document can contain at most one context. 
+A datap **context** is defined in a single YAML document. A YAML document can contain at most one context.
 
 A context spans a tree of the following types of *nodes*:
 
@@ -34,6 +38,7 @@ A context spans a tree of the following types of *nodes*:
 * error
 * structure
 
+The flow of data is from leafs towards root, and ends at a *tap*. Thus, each sub-tree below a *tap* defines a data processing pipe. We use *upstream* to denote nodes that are in a sub-tree relative to a given node. We use *downstream* to denote nodes that are in the branch towards the tree's root.
 
 ## Nodes
 
@@ -44,15 +49,21 @@ A context spans a tree of the following types of *nodes*:
 **Structure** nodes fulfill two purposes:
 
 * they define a hierarchy of other nodes
-* they provide a structure to define and share *variables*
+* they provide a structure to define *variables* and their scope
 
-Structures are ignored in processing pipes, they are treated as simple pass-through joints.
+In terms of processing, structures are of no relevance and data is simply passed through.
 
 ```
-$name:
-  [variables]
-  n* pipe|junction|joint|factory|warning|error|structure
+[pipe|junction|joint|factory|warning|error|structure]
+  $structureName:
+    [variables]
+    n* pipe|junction|joint|factory|warning|error|structure
 ```
+
+NOTE: as a consequence:
+
+* a structure may never be a leaf
+* a structure has no other recognizable type declaration than being a named associative list. Thus, any named associative list inside a structure is itself a structure.
 
 #### Variable
 
@@ -78,13 +89,13 @@ Closing Prices:
 
 ##### Variable Reference
 
-Variables can be referenced from: 
+Variables can be referenced from:
 
 * *parameter* default values
-* function *arguments* 
+* function *arguments*
 * other downstream *variable* definitions
 
-They are referenced using the @ prefix. 
+They are referenced using the @ prefix.
 
 ##### Example
 
@@ -92,6 +103,8 @@ They are referenced using the @ prefix.
 AAPL:
   type: tap
   variables:
+    #variable reference
+    #maxNaRatioDefault must be defined upstream
     maxNaRatio: '@maxNaRatioDefault'
     yahooSymbol: AAPL
     quandlCode: 'YAHOO/AAPL'
@@ -102,17 +115,28 @@ AAPL:
 
 #### Tap
 
-A **tap** defines an entry point to specific data of a context. 
+A **tap** defines an entry point to specific data of a context.[^1]
 
-Conceptually, you can think of a tap as a function: when you open it, data pours out.
+  [^1] Conceptually, you can think of a tap as a function: when you open a tap (call the function), data pours out (data is returned).
+
+A tap can only be defined if there is no other tap upstream.
 
 ```
-$name:
-  type: tap
-  [parameters]
-  [variables]
-  pipe|junction|joint|factory|warning|error|structure
+[n* structure]
+  $tapname:
+    type: tap
+    [attributes]
+    [parameters]
+    [variables]
+    pipe|junction|joint|factory|warning|error|structure
 ```
+
+#### attributes
+
+Attributes can contain information and/or meta data that is not part of the data processing. For example, you can store a long name, description, etc.
+
+NOTE:
+
 
 #### Parameters
 
@@ -135,5 +159,5 @@ AAPL:
   parameters:
     code: 'YAHOO/AAPL'
     periods: 10
-  pipe: *Quandl 
+  pipe: *Quandl
 ```
