@@ -12,10 +12,10 @@ datap is a format to define configurable, modular data processing pipes.
 
 ## Definitions
 
-[]: optional elements
-$: replace the following string with an appropriate name
-n*: repeat the element n times
-|: or
+* []: optional elements
+* $: replace the following string with an appropriate name
+* n*: repeat the element n times
+* |: or
 
 ## datap Elements
 
@@ -23,7 +23,7 @@ n*: repeat the element n times
 
 A datap **context** is defined in a single YAML document. A YAML document can contain at most one context. 
 
-A context spans a tree of the following types of nodes:
+A context spans a tree of the following types of *nodes*:
 
 * tap
 * pipe
@@ -37,24 +37,66 @@ A context spans a tree of the following types of nodes:
 
 ## Nodes
 
-
 ### Structure
 
 #### Structure
 
-**Structure** nodes define a hierarchy of other nodes, and provide a structure to define and share *variables*.
+**Structure** nodes fulfill two purposes:
+
+* they define a hierarchy of other nodes
+* they provide a structure to define and share *variables*
 
 Structures are ignored in processing pipes, they are treated as simple pass-through joints.
 
 ```
 $name:
   [variables]
-  pipe|junction|joint|factory|warning|error|structure
+  n* pipe|junction|joint|factory|warning|error|structure
 ```
 
 #### Variable
 
-Variables can be defined in any node in a context, and re-used in parameters, arguments, and other variable definitions.
+##### Variable Definition
+
+Variables can be defined in any *node* in a *context*.
+
+```
+variables:
+  n* $variableName: $value
+```
+
+For example:
+
+```{YAML}
+Closing Prices:
+  variables:
+    series: Close
+    startDate: 2000-01-01
+  SPX: *SPX
+  DJIA: *DJIA
+```
+
+##### Variable Reference
+
+Variables can be referenced from: 
+
+* *parameter* default values
+* function *arguments* 
+* other downstream *variable* definitions
+
+They are referenced using the @ prefix. 
+
+##### Example
+
+```
+AAPL:
+  type: tap
+  variables:
+    maxNaRatio: '@maxNaRatioDefault'
+    yahooSymbol: AAPL
+    quandlCode: 'YAHOO/AAPL'
+  pipe: *QYPipe
+```
 
 ### Tap
 
