@@ -76,7 +76,7 @@ A datap [`>context`](#context) is defined in a single YAML document. A YAML docu
 
 A [`>context`](#context) spans a tree whose nodes are each one the following types of *joints*:
 
-* tap: entry point to data, can have parameters
+* [`>tap`](#tap): entry point to data, can have parameters
 * [`>structure`](#structure): organise taps into hierarchies
 * flow control:
 	* [`>pipe`](#pipe): combine joints serially
@@ -272,12 +272,12 @@ A [`>tap`](#tap) defines an entry point to specific data, within a context.
 
 ```
 [>structure]
-  $tapname:
+  $tapName:
     type: tap
     [>attributes]
     [>parameters]
     [>variables]
-    >pipe|junction|processor|factory|warning|error|structure
+    >pipe|junction|processor
 ```
 
 > There are only [`>structure`](#structure) joints downstream from a tap.
