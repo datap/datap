@@ -9,7 +9,7 @@
 - [Preliminary Remarks](#preliminary-remarks)
 	- [Document Version](#document-version)
 	- [Scope](#scope)
-	- [Syntax Definitions](#syntax-definitions)
+	- [Syntax Description Conventions](#syntax-description-conventions)
 - [datap Syntax](#datap-syntax)
 	- [*context*](#context)
 	- [*variables*](#variables)
@@ -42,23 +42,26 @@
 
 ### Document Version
 
-- Version: 0.1
+- datap version: 0.1
+- Document Version: 0.1
 - Date: 2016-04-17
 - License:
 
 ### Scope
 
-datap is a YAML format to define configurable, modular data processing pipes. These configurations can be used to acquire, pre-process, quality-assure, and merge data.
+datap is a YAML format to define configurable, modular data processes. datap configurations can be used to acquire, pre-process, quality-assure, and merge data.
+
+datap is language neutral.
 
 In practice, each datap setup will consist of the following elements:
 
-1. one or more datap configuration files
-2. one or more code libraries, doing the actual units of work
-3. a datap interpreter in the programming language of your choice. The interpreter parses the configuration file, and maps processing steps (1) to actual library functions (2)
+1. One or more datap configuration files.
+2. One or more code libraries in the programming language of your choice. These libraries do the actual units of work.
+3. A datap interpreter in the programming language of your choice. The interpreter parses the configuration file, and maps processing steps defined in (1) to actual library functions available in (2).
 
-This document is about the first part only.
+This document is about the first part only: the datap configuration files.
 
-### Syntax Definitions
+### Syntax Description Conventions
 
 In this document, the datap syntax is described using the following conventions:
 
@@ -97,7 +100,7 @@ Variables can be defined in a [`>structure`](#structure), [`>tap`](#tap), [`>pip
 A [`>variables`](#variables) section is an *associative list*, called "variables". Each variable is an entry in that list, with the *key* defining the variable *name*, and the *value* defining the variable *value*:
 
 ```
->structure|tap|pipe|junction
+>structure|>tap|>pipe|>junction
   variables:
     n* $variableName: $value
 ```
@@ -126,7 +129,7 @@ A [`>reference`](#reference) has an *@* prefix, and refers to a downstream *vari
 You can use a [`>reference`](#reference) in a *parameter*, an *argument*, or in another *variable*.
 
 ```
->parameters|arguments|variables:
+>parameters|>arguments|>variables:
   $name: @$variableReferenceName
 ```
 Or, for unnamed [`>arguments`](#arguments):
@@ -230,7 +233,7 @@ Attributes can contain information and/or meta data that is not part of the data
 The datap interpreter may then provide additional functionality, e.g. to find a [`>tap`](#tap) by attribute.
 
 ```
->pipe|junction|processor|factory|warning|error|structure
+>pipe|>junction|>processor|>factory|>warning|>error|>structure
   n* $attributeName: $value
 ```
 
@@ -253,7 +256,7 @@ In terms of data processing, structures are of no relevance.
 [>structure]
   $structureName:
     [>variables]
-    n* >pipe|junction|tap|structure
+    n* >pipe|>junction|>tap|>structure
 ```
 
 > Consequentially:
@@ -277,7 +280,7 @@ A [`>tap`](#tap) defines an entry point to specific data, within a context.
     [>attributes]
     [>parameters]
     [>variables]
-    >pipe|junction|processor
+    >pipe|>junction|>processor
 ```
 
 > There are only [`>structure`](#structure) joints downstream from a tap.
@@ -289,7 +292,7 @@ A [`>parameter`](#parameter) allows a user to provide an argument when calling a
 
 A [`>tap`](#tap) may have 0 to n parameters.
 
-Parameters may have *default values*.
+Parameters may have *default arguments*.
 
 ```
 >tap
@@ -331,7 +334,7 @@ A [`>processor`](#processor) defines a unit of work, such as data acquisition an
 A datap [`>function`](#function) is a directive to the datap interpreter how a [`>processor`](#processor), [`>error`](#error), or [`>warning`](#warning) is mapped to an actual function in the actual code library.
 
 ```
->processor|error|warning
+>processor|>error|>warning
   function: $functionName
 ```
 
@@ -344,7 +347,7 @@ The [`>arguments`](#arguments) section define what arguments will be passed to a
 The arguments can be *named* or *unnamed*:
 
 ```
->processor|error|warning
+>processor|>error|>warning
   arguments:
     n* - $argument | n* $parameterName: $argument
 ```
@@ -436,12 +439,12 @@ Cache:
 A [`>pipe`](#pipe) joint lets you arrange a number of upstream joints sequentially.
 
 ```
->tap|pipe|junction
+>tap|>pipe|>junction
   $pipeName:
     type: pipe
     [>attributes]
     [>variables]
-    n* >pipe|junction|processor|factory|warning|error
+    n* >pipe|>junction|>processor|>factory|>warning|>error
 ```
 
 For example, the following [`>pipe`](#pipe) first checks if the number of NAs in a series is below an inacceptable threshold (*NA Ratio*), then it backfills missing values (*Fill NAs*):
@@ -470,7 +473,7 @@ A [`>junction`](#junction) merges multiple upstream joints into a single stream.
 Unlike the [`>pipe`](#pipe), the [`>junction`](#junction) has a [`>function`](#function), which is a directive how to merge the upstream joints.
 
 ```
->tap|pipe|junction
+>tap|>pipe|>junction
   $junctionName:
     type: junction
     [>attributes]
